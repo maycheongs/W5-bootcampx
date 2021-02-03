@@ -10,21 +10,21 @@ const pool = new Pool({
 
 
 pool.query(`
-SELECT students.id, students.name as name, cohorts.name as cohort
-FROM students
+SELECT DISTINCT teachers.name as teacher, cohorts.name as cohort
+FROM teachers
+JOIN assistance_requests ON teacher_id = teachers.id
+JOIN students ON student_id = students.id
 JOIN cohorts ON cohort_id = cohorts.id
-WHERE cohorts.name LIKE '%${process.argv[2]}%'
-LIMIT ${process.argv[3] || 5};
+WHERE cohorts.name = '${process.argv[2] || 'JUL02'}'
+ORDER BY teacher;
 `)
 .then(res => {
-  res.rows.forEach(student => {
-    console.log(`${student.name} has an id of ${student.id} and was in the ${student.cohort} cohort.`)
-  });
+  res.rows.forEach(row => {
+    console.log(`${row.cohort}: ${row.teacher}`)
+  })
 })
 .catch(err => console.error('query error', err.stack));
 
 pool.connect(() => {
   console.log('connected to pool')
 });
-
-
